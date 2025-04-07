@@ -1,17 +1,15 @@
 require_relative "./terminal.rb"
+require_relative "./room.rb"
 
 def main()
-  puts "Roblox!"
+  inventory = []
+  health = 100
 
-  clear_terminal()
-
-  print_in_center("Welcome")
-  print_in_center("To Roblox!")
-  print_in_center("(Fortnite isn't bad)")
-
-  inventory = ["Sword", "Shield", "Health Potion"]
-  select_from_list(inventory, "Inventory")
+  print_in_center("Välkommen till spelet!")
+  ask("Vad heter du?")
+  print_in_center("Hello, #{name}!")
   
+  select_from_list(inventory, "Inventory")
 end
-
+    
 main()
