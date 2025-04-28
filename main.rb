@@ -1,15 +1,269 @@
+# Lägg till björn, battle mechanic mot björnen, en alternativ win condition (björn)
+
 require_relative "./terminal.rb"
 require_relative "./room.rb"
 
+def skriva_ut_info(name, desc)
+  puts name
+  puts desc
+end
+
+def is_valid_choice(options, choice, inventory)
+  i = 1
+  for option in options
+    if i == choice.to_i
+      if !has_required_items?(option[1], inventory)
+        return [false, "Du har inte alla nödvändiga föremål. #{option[1].join(", ")}" ]
+      else
+        return [true, ""]
+      end
+    end
+    i += 1
+  end
+  
+  return [false, "Ogiltigt val. Försök igen."]
+end
+
+def get_valid_options_names(options)
+  valid_options = []
+  i = 1
+  for option in options
+    valid_options.push("(#{i}) #{option[0]}")
+    i += 1
+  end
+  return valid_options
+end
+
+# options: [["namn", ["föremål 1", "föremål 2""]]]
+def choose(options, inventory)
+  while true
+    choice = ask("Möjliga val: #{get_valid_options_names(options).join(", ")}")
+
+    res = is_valid_choice(options, choice, inventory)
+
+    if res[0]
+      break
+    end
+
+    puts res[1]
+  end
+
+  return choice
+end
+
+def item_count(inventory, item)
+  return inventory.count(item)
+end
+
+def remove_inventory_item(inventory, item)
+  inventory.delete(item)
+end
+
+def has_required_items?(items, inventory)
+  return items.all? { |item| inventory.count(item) >= items.count(item) }
+end
+
+def remove_inventory_items(items, inventory)
+  items.each do |item|
+    if inventory.include?(item)
+      inventory.delete(item)
+    end
+  end
+end
+
+def room_attic_entraence(inventory)
+  skriva_ut_info("Vindsluckan", "Du står nedanför en mystisk vindslucka. Vad ska du göra?")
+  val = choose([
+    ["Gå in i vinden", []],
+    ["Gå hem", []]
+  ], inventory)
+
+  if val == "1"
+    return :room_attic
+  else
+    puts "Fegis!"
+    return nil
+  end
+end
+
+def room_attic(inventory)
+  skriva_ut_info("Vinden", "Du står i en mörk och skrämmande vind. Något springer runt dina fötter. Vad ska du göra?")
+  val = choose([
+    ["Provocera", []],
+    ["Få panik", []]
+  ], inventory)
+  
+  if val == "1"
+    puts "Du lyckas skrämma bort råttorna för nu. Du fortsätter in i vinden."
+    return :room_attic_2
+  elsif val == "2"
+    return :room_rats_on_you
+  end
+end
+
+def room_attic_2(inventory)
+    skriva_ut_info("Rum 2", "Du står nu framför en flyttlåda, vågar du titta i den?")
+    val = choose([
+      ["Titta i lådan", []],
+      ["Gå vidare", []]
+    ], inventory)
+
+    if val == "1"
+      if rand(0..1) == 1
+        puts "En råtta hoppar ut ur lådan och biter dig i handen. Du dör."     
+        return nil
+      else
+        puts "Du hittar hårsprej en tom tänd sticksask i lådan. Du plockar upp den."
+        inventory.push("Hårspray")
+        inventory.push("Tändstickor")
+        return :room_attic_3
+      end
+    elsif val == "2"
+      return :room_attic_3
+    end
+end
+
+def room_attic_3(inventory)
+  skriva_ut_info("Rum 3", "Du står nu framför en gammal bokhylla. Vad ska du göra?")
+  val = choose([
+    ["Titta i bokhyllan", []],
+    ["Gå vidare till ett fönster", []]
+  ], inventory)
+
+  if val == "1"
+    puts "Du hittar en gammal bok. Du plockar upp den. En hemlig löndör öppnas bakom bokhyllan."
+    inventory.push("Gammal bok")
+    return :room_secret_door
+  elsif val == "2"
+    return :room_window
+  end
+end
+
+def room_secret_door(inventory)
+   skriva_ut_info("Hemlig dörr", "Du står nu framför en hemlig dörr. Vad ska du göra?")
+   val = choose([
+      ["Gå in", []],
+      ["Gå mot fönstret istället", []]
+], inventory)
+  
+  if val == "1"
+    return :room_secret_room
+  elsif val == "2"
+    return :room_window
+  end
+end
+
+def room_secret_room(inventory)
+    skriva_ut_info("Hemlig rum", "Du står nu i ett hemligt rum. Du ser en mystisk teckning på ett podium av en hand. Vad ska du göra?")
+    val = choose([
+      ["Lägga din avskurna hand där", ["Avskuren hand"]],
+      ["Lägg en död råtta där", ["Död råtta"]],
+      ["Gå tillbaka till vinden", []]
+    ], inventory)
+
+    if val == "1"
+      puts "Teckningen börjar lysa och din hand fastnat som en magnet på din arm igen. Du vaknar upp i din säng. Du har överlevt."
+      remove_inventory_items(["Avskuren hand"], inventory)
+      return nil
+    elsif val == "2"
+      puts "Dörren bakom dig stängs. Du svimar och dör. "
+      return nil
+    elsif val == "3"
+      return :room_window
+    end
+end
+
+def room_rats_on_you(inventory)
+  skriva_ut_info("Råttor", "Råttorna har hittat dig och börjar äta på dig. Vad ska du göra?")
+  val = choose([
+    ["Skrika", []],
+    ["Sparka", []],
+    ["Bygga en Boring Company (TM) eldkastare", ["Tändstickor", "Hårspray"]],
+  ], inventory)
+
+  if val == "1"
+     puts "Råttorna kryper in i din mun. Du kvävs och dör."
+     return nil
+  elsif val == "2"
+    puts "Du sparkar mot råttorna. De blir ännu argare och biter dig i benen, men du lyckas överleva. När du ställer dig upp råkar du trampa på en av råttorna och lyckas döda den. Du plockar upp den."
+    inventory.push("Död råtta")
+    return :room_attic_2
+  elsif val == "3"
+    puts "Du bygger en Boring Company (TM) eldkastare och skrämmer bort råttorna. Du hittar en låda med tändstickor."
+    remove_inventory_items(["Tändstickor", "Hårspray"], inventory)
+    return :room_set_fire_to_the_attic
+  end
+end
+
+def room_set_fire_to_the_attic(inventory)
+  skriva_ut_info("Vinden", "Du kom på att du med elkastaren kan sätta eld på vinden. Vad ska du göra?")
+  val = choose([
+    ["Sätta eld på vinden", []],
+    ["Låta råttorna leva och gå mot utgången", []]
+  ], inventory)
+
+  if val == "1"
+    puts "Du sätter eld på vinden och råttorna brinner upp. Du dör också."
+    return nil
+  elsif val == "2"
+    return :room_window
+  end
+end
+
+def room_window(inventory)
+  if bear_check != 1
+    skriva_ut_info("Fönstret", "Du står nu framför ett fönster. Vad ska du göra?")
+    val = choose([
+      ["Hoppa ut genom fönstret", []],
+      ["Använda en död råtta för att slå sönder rutan", ["Död råtta"]],
+      ["Gå tillbaka in i vinden", []]
+    ], inventory)
+
+    if val == "1"
+      puts "Fönstret gick sönder och du förblödde på grund av alla glasskärvor du fick i dig."
+      return nil
+    elsif val == "2"
+      if rand(0..1) == 1
+        puts "Du slår sönder rutan med den döda råttan. Du hoppar ut genom fönstret och överlever."
+        return nil
+      else
+        puts "Du missar rutan och råttan träffar dig i ansiktet. Du får ont och slår istället sönder rutan med handen. Du lyckas skära av handen. "
+        inventory.push("Avskuren hand")
+        remove_inventory_items(["Död råtta"], inventory)
+        return :room_attic_2
+      end
+    elsif val == "3"
+      return :room_attic
+    end
+  else
+    return :room_bear
+  end
+end
+
+def room_bear(inventory)
+  skriva_ut_info("En björn", "Du står nu framför en björn. Vad ska du göra?")
+    val = choose([
+      ["Spring för livet", []],
+      ["Stå upp för dig själv", []],
+      ["Ge upp", []]
+    ])
+end
+
 def main()
   inventory = []
-  health = 100
+
+  bear_check = 0
 
   print_in_center("Välkommen till spelet!")
-  ask("Vad heter du?")
+  name = ask("Vad heter du?")
   print_in_center("Hello, #{name}!")
   
-  select_from_list(inventory, "Inventory")
+  room = :room_attic_entraence
+  while room != nil
+    room = method(room).call(inventory)
+  end
+  
+  # select_from_list(inventory, "Inventory")
 end
 
 main()
