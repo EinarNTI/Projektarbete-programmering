@@ -11,5 +11,5 @@ def main()
   
   select_from_list(inventory, "Inventory")
 end
-    
+
 main()
