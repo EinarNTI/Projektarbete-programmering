@@ -3,11 +3,28 @@
 require_relative "./terminal.rb"
 require_relative "./room.rb"
 
+# Beskrivning: Puts information about the current room to the terminal.
+# Argument 1: string - Name of the room
+# Argument 2: string - Description of the room
+# Return: None
+# Exempel:
+#   skriva_ut_info("Rum 1", "Detta är rum 1") # Skriver ut "Rum 1" och "Detta är rum 1"
+# Datum: 2025-05-05
 def skriva_ut_info(name, desc)
   puts name
   puts desc
 end
 
+# Beskrivning: Checks if the choice the player is valid. Checks if its a valid choice and that the player has the required items. 
+# Argument 1: Array - List of options valid options and the items they require [["namn", ["föremål 1", "föremål 2""]]]
+# Argument 2: string - The choice the player made
+# Argument 3: Array - The items in the players inventory
+# Return: Array - [bool, string] - true if the choice is valid, false if not. The string contains an error message if the choice is invalid
+# Exempel:
+#   is_valid_choice([["Gå in i vinden", []], ["Gå hem", []]], "1", ["Hårspray"]) # returns [true, ""]
+#   is_valid_choice([["Bygg en flamethrower", []], ["Gå hem", []]], "1", ["Hårspray"]) # returns [false, "Du har inte alla nödvändiga föremål. Hårspray, tändare"]
+#   is_valid_choice([["Gå in i vinden", []], ["Gå hem", []]], "2", ["Hårspray"]) # returns [false, "Ogiltigt val. Försök igen."]
+# Datum: 2025-05-05
 def is_valid_choice(options, choice, inventory)
   i = 1
   for option in options
@@ -35,6 +52,14 @@ def get_valid_options_names(options)
 end
 
 # options: [["namn", ["föremål 1", "föremål 2""]]]
+
+# Beskrivning: Ask the player to choose an option from a list of options. The player can only choose a valid option.
+# Argument 1: Array - List of options valid options and the items they require [["namn", ["föremål 1", "föremål 2""]]]
+# Argument 2: Array - The items in the players inventory
+# Return: string - The choice the player made
+# Exempel:
+#   choose([["Gå in i vinden", []], ["Gå hem", []]], ["Hårspray"]) # returns "1" or "2" depending on the players choice. If the player chooses an invalid option, the function will ask again until a valid option is chosen.
+# Datum: 2025-05-05
 def choose(options, inventory)
   while true
     choice = ask("Möjliga val: #{get_valid_options_names(options).join(", ")}")
