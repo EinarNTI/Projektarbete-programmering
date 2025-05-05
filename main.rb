@@ -1,7 +1,4 @@
-# Lägg till björn, battle mechanic mot björnen, en alternativ win condition (björn)
-
 require_relative "./terminal.rb"
-require_relative "./room.rb"
 
 $bear_check = 0
 
@@ -343,8 +340,6 @@ def main()
   while room != nil
     room = method(room).call(inventory)
   end
-  
-  # select_from_list(inventory, "Inventory")
 end
 
 main()
