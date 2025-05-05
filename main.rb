@@ -3,7 +3,8 @@
 require_relative "./terminal.rb"
 require_relative "./room.rb"
 
-<<<<<<< Updated upstream
+$bear_check = 0
+
 # Beskrivning: Puts information about the current room to the terminal.
 # Argument 1: string - Name of the room
 # Argument 2: string - Description of the room
@@ -11,10 +12,6 @@ require_relative "./room.rb"
 # Exempel:
 #   skriva_ut_info("Rum 1", "Detta är rum 1") # Skriver ut "Rum 1" och "Detta är rum 1"
 # Datum: 2025-05-05
-=======
-$bear_check = 0
-
->>>>>>> Stashed changes
 def skriva_ut_info(name, desc)
   puts name
   puts desc
