@@ -3,6 +3,7 @@
 require_relative "./terminal.rb"
 require_relative "./room.rb"
 
+<<<<<<< Updated upstream
 # Beskrivning: Puts information about the current room to the terminal.
 # Argument 1: string - Name of the room
 # Argument 2: string - Description of the room
@@ -10,6 +11,10 @@ require_relative "./room.rb"
 # Exempel:
 #   skriva_ut_info("Rum 1", "Detta är rum 1") # Skriver ut "Rum 1" och "Detta är rum 1"
 # Datum: 2025-05-05
+=======
+$bear_check = 0
+
+>>>>>>> Stashed changes
 def skriva_ut_info(name, desc)
   puts name
   puts desc
@@ -149,6 +154,9 @@ def room_attic_2(inventory)
 end
 
 def room_attic_3(inventory)
+  if $bear_check == 1
+    return :room_bear
+  end
   skriva_ut_info("Rum 3", "Du står nu framför en gammal bokhylla. Vad ska du göra?")
   val = choose([
     ["Titta i bokhyllan", []],
@@ -179,7 +187,7 @@ def room_secret_door(inventory)
 end
 
 def room_secret_room(inventory)
-    skriva_ut_info("Hemlig rum", "Du står nu i ett hemligt rum. Du ser en mystisk teckning på ett podium av en hand. Vad ska du göra?")
+    skriva_ut_info("Hemligt rum", "Du står nu i ett hemligt rum. Du ser en mystisk teckning på ett podium av en hand. Vad ska du göra?")
     val = choose([
       ["Lägga din avskurna hand där", ["Avskuren hand"]],
       ["Lägg en död råtta där", ["Död råtta"]],
@@ -236,32 +244,21 @@ def room_set_fire_to_the_attic(inventory)
 end
 
 def room_window(inventory)
-  if bear_check != 1
-    skriva_ut_info("Fönstret", "Du står nu framför ett fönster. Vad ska du göra?")
-    val = choose([
-      ["Hoppa ut genom fönstret", []],
-      ["Använda en död råtta för att slå sönder rutan", ["Död råtta"]],
-      ["Gå tillbaka in i vinden", []]
-    ], inventory)
-
-    if val == "1"
-      puts "Fönstret gick sönder och du förblödde på grund av alla glasskärvor du fick i dig."
+  if val == "1"
+    puts "Fönstret gick sönder och du förblödde på grund av alla glasskärvor du fick i dig."
+    return nil
+  elsif val == "2"
+    if rand(0..1) == 1
+      puts "Du slår sönder rutan med den döda råttan. Du hoppar ut genom fönstret och överlever."
       return nil
-    elsif val == "2"
-      if rand(0..1) == 1
-        puts "Du slår sönder rutan med den döda råttan. Du hoppar ut genom fönstret och överlever."
-        return nil
-      else
-        puts "Du missar rutan och råttan träffar dig i ansiktet. Du får ont och slår istället sönder rutan med handen. Du lyckas skära av handen. "
-        inventory.push("Avskuren hand")
-        remove_inventory_items(["Död råtta"], inventory)
-        return :room_attic_2
-      end
-    elsif val == "3"
-      return :room_attic
+    else
+      puts "Du missar rutan och råttan träffar dig i ansiktet. Du får ont och slår istället sönder rutan med handen. Du lyckas skära av handen. "
+      inventory.push("Avskuren hand")
+      remove_inventory_items(["Död råtta"], inventory)
+      return :room_attic_2
     end
-  else
-    return :room_bear
+  elsif val == "3"
+    return :room_attic
   end
 end
 
@@ -272,12 +269,31 @@ def room_bear(inventory)
       ["Stå upp för dig själv", []],
       ["Ge upp", []]
     ])
+    if val == "1"
+      puts "Björnen är snabbare än dig och fångar dig. Du dör."
+      return nil
+    elsif val == "2"
+      puts "Du står upp för dig själv och björnen blir imponerad."
+      return :room_bear_fight
+    elsif val == "3"
+      puts "Du ger upp och björnen äter dig. Du dör."
+      return nil
+    end
 end
+
+def room_bear_fight(inventory)
+  skriva_ut_info("Björnen", "Du står nu framför björnen. Vad ska du göra?")
+  val = choose([
+    ["Leta i omgivningen efter ett vapen", []], ["Använd något du plockat upp", []],
+    ["Ge upp", []]])
+  if val == "1"
+  end
+  return nil
+end
+
 
 def main()
   inventory = []
-
-  bear_check = 0
 
   print_in_center("Välkommen till spelet!")
   name = ask("Vad heter du?")
