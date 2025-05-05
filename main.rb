@@ -78,10 +78,6 @@ def choose(options, inventory)
   return choice
 end
 
-def item_count(inventory, item)
-  return inventory.count(item)
-end
-
 def remove_inventory_item(inventory, item)
   inventory.delete(item)
 end
