@@ -154,6 +154,7 @@ def room_attic_3(inventory)
   if $bear_check == 1
     return :room_bear
   end
+  $bear_check += 1
   skriva_ut_info("Rum 3", "Du står nu framför en gammal bokhylla. Vad ska du göra?")
   val = choose([
     ["Titta i bokhyllan", []],
@@ -241,6 +242,13 @@ def room_set_fire_to_the_attic(inventory)
 end
 
 def room_window(inventory)
+  skriva_ut_info("Fönstret", "Du står nu framför ett fönster. Vad ska du göra?")
+  val = choose([
+    ["Hoppa ut genom fönstret", []],
+    ["Använda en död råtta för att slå sönder rutan", ["Död råtta"]],
+    ["Gå tillbaka in i vinden", []]
+  ], inventory)
+
   if val == "1"
     puts "Fönstret gick sönder och du förblödde på grund av alla glasskärvor du fick i dig."
     return nil
@@ -265,7 +273,7 @@ def room_bear(inventory)
       ["Spring för livet", []],
       ["Stå upp för dig själv", []],
       ["Ge upp", []]
-    ])
+    ],inventory)
     if val == "1"
       puts "Björnen är snabbare än dig och fångar dig. Du dör."
       return nil
@@ -279,12 +287,51 @@ def room_bear(inventory)
 end
 
 def room_bear_fight(inventory)
+  bear_health = 10
+  player_health = 10
   skriva_ut_info("Björnen", "Du står nu framför björnen. Vad ska du göra?")
   val = choose([
-    ["Leta i omgivningen efter ett vapen", []], ["Använd något du plockat upp", []],
-    ["Ge upp", []]])
+    ["Leta i omgivningen efter ett vapen", []], ["Använd något du plockat upp", ["Hårspray","Tändstickor"]],
+    ["Ge upp", []]], inventory)
   if val == "1"
+    weapon = rand(1..2)
+    if weapon == 1
+      inventory.push("Gammal kniv")
+      puts "Du hittar en gammal kniv. Du svingar den mot björnen."
+      bear_health -= 2
+    else
+      inventory.push("Gammal yxa")
+      puts "Du hittar en gammal yxa. Du hugger mot björnen."
+      bear_health -= 4
+    end
+  elsif val == "2"
+    puts "Du använder din hårspray och tändstickor som en eldkastare. Björnen blir skrämd och springer iväg."
+    inventory.remove_inventory_items(["Hårspray", "Tändstickor"])
+  else
+    puts "Du ger upp och björnen äter dig. Du dör."
+    return nil
   end
+    while bear_health > 0 && player_health > 0
+      val = choose([["Svinga med yxan", ["Gammal yxa"]], ["Hugg med kniven", ["Gammal kniv"]], ["Slå för glatta livet", []]],inventory)
+      if val == "1"
+        puts "Du svingar din yxa mot björnen."
+        bear_health -= 4
+      elsif val == "2"
+        puts "Du hugger med din kniv mot björnen."
+        bear_health -= 2
+      elsif val == "3"
+        puts "Du slår för glatta livet och träffar björnen."
+        bear_health -= 1
+      end
+      puts "Björnen hugger tillbaka."
+      player_health -= 2
+    end
+    if bear_health <= 0
+      puts "Du har dödat björnen! Snyggt jobbat."
+      return :room_attic_3 
+    else
+      puts "Björnen har dödat dig. Du dör."
+    end
   return nil
 end
 
